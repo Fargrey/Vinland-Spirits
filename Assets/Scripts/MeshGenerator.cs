@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+
 public static class MeshGenerator {
 
 	public static MeshData GenerateTerrainMesh(float[,] heightMap, float heightMultiplier, AnimationCurve _heightCurve, int levelOfDetail) {
@@ -54,6 +55,31 @@ public class MeshData {
 		triangles [triangleIndex + 1] = b;
 		triangles [triangleIndex + 2] = c;
 		triangleIndex += 3;
+	}
+
+	Vector3[] CalculateNormals(){
+		Vector3[] vertexNormals = new Vector3[vertices.Length];
+		int triangleCount = triangles.Length / 3;
+
+		for (int i = 0; i < triangleCount; i++) {
+			int normalTriangleIndex = i * 3;
+			int vertexIndexA = triangles [normalTriangleIndex];
+			int vertexIndexB = triangles [normalTriangleIndex+1];
+			int vertexIndexC = triangles [normalTriangleIndex+2];
+
+
+		}
+
+	}
+
+	Vector3 SurfaceNormalFromIndices(int indexA, int indexB, int indexC){
+		Vector2 pointA = vertices [indexA];
+		Vector2 pointB = vertices [indexB];
+		Vector2 pointC = vertices [indexC];
+
+		Vector3 sideAB = pointB - pointA;
+		Vector3 sideAC = pointC - pointA;
+		return Vector3.Cross (sideAB, sideAC).normalized;
 	}
 
 	public Mesh CreateMesh() {
