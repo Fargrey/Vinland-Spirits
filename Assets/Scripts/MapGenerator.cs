@@ -6,12 +6,12 @@ using System.Collections.Generic;
 
 public class MapGenerator : MonoBehaviour {
 
-	public enum DrawMode {NoiseMap, ColourMap, Mesh, FallofMap};
+	public enum DrawMode {NoiseMap, ColourMap, Mesh};
 	public DrawMode drawMode;
 
 	public Noise.NormalizeMode normalizeMode;
 
-	public const int mapChunkSize = 241; // Não pode ser par
+	public const int mapChunkSize = 241;
 	[Range(0,6)]
 	public int editorPreviewLOD;
 	public float noiseScale;
@@ -24,8 +24,6 @@ public class MapGenerator : MonoBehaviour {
 	public int seed;
 	public Vector2 offset;
 
-	public bool useFallof;
-
 	public float meshHeightMultiplier;
 	public AnimationCurve meshHeightCurve;
 
@@ -33,14 +31,8 @@ public class MapGenerator : MonoBehaviour {
 
 	public TerrainType[] regions;
 
-	float[,] fallofMap;
-
 	Queue<MapThreadInfo<MapData>> mapDataThreadInfoQueue = new Queue<MapThreadInfo<MapData>>();
 	Queue<MapThreadInfo<MeshData>> meshDataThreadInfoQueue = new Queue<MapThreadInfo<MeshData>>();
-
-	void Awake(){
-		fallofMap = FallofGenerator.GenerateFallofMap (mapChunkSize);
-	}
 
 	public void DrawMapInEditor() {
 		Debug.Log ("DrawMapInEditor");
@@ -53,9 +45,6 @@ public class MapGenerator : MonoBehaviour {
 			display.DrawTexture (TextureGenerator.TextureFromColourMap (mapData.colourMap, mapChunkSize, mapChunkSize));
 		} else if (drawMode == DrawMode.Mesh) {
 			display.DrawMesh (MeshGenerator.GenerateTerrainMesh (mapData.heightMap, meshHeightMultiplier, meshHeightCurve, editorPreviewLOD), TextureGenerator.TextureFromColourMap (mapData.colourMap, mapChunkSize, mapChunkSize));
-		}
-		else if(drawMode== DrawMode.FallofMap){
-			display.DrawTexture (TextureGenerator.TextureFromHeightMap(FallofGenerator.GenerateFallofMap(mapChunkSize)));
 		}
 
 	}
@@ -112,9 +101,6 @@ public class MapGenerator : MonoBehaviour {
 		Color[] colourMap = new Color[mapChunkSize * mapChunkSize];
 		for (int y = 0; y < mapChunkSize; y++) {
 			for (int x = 0; x < mapChunkSize; x++) {
-				if (useFallof) {
-					noiseMap[x,y] = Mathf.Clamp01(noiseMap[x,y] - fallofMap[x,y]);
-				}
 				float currentHeight = noiseMap [x, y];
 				for (int i = 0; i < regions.Length; i++) {
 					if (currentHeight >= regions [i].height) {
@@ -137,8 +123,6 @@ public class MapGenerator : MonoBehaviour {
 		if (octaves < 0) {
 			octaves = 0;
 		}
-
-		fallofMap = FallofGenerator.GenerateFallofMap (mapChunkSize);
 	}
 
 	struct MapThreadInfo<T> {
